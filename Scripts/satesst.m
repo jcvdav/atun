@@ -11,3 +11,6 @@ mget(F1,file,data_save); % Se descarga el archivo con mget
 close(f1) %cierra el ftp
 
 % ftp://podaac-ftp.jpl.nasa.gov/OceanTemperature/modis/L3/aqua/4um/v2014.0/4km/monthly/2003/
+
+
+
