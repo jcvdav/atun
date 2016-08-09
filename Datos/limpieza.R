@@ -18,7 +18,6 @@ T2011 <- read.csv("TALLAS2011.csv", sep=";")
 T2012 <- read.csv("TALLAS2012.csv", sep=";")
 
 columnas <- c("Fecha", "Latitud", "Longitud", "Tipo", "Talla")
-columnas2 <- c("Diego es puto")
 
 colnames(T2003) <- columnas
 colnames(T2004) <- columnas
