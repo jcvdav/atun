@@ -3,8 +3,6 @@ library(ggmap)
 library(dplyr)
 library(tidyr)
 
-setwd("~/../Dropbox (Personal)/Documentos/Proyectos/Atún/Tallas/Datos/crudos")
-
 T2003 <- read.csv("TALLAS2003.csv", sep=";")
 T2004 <- read.csv("TALLAS2004.csv", sep=";")
 T2005 <- read.csv("TALLAS2005.csv", sep=";") %>%
@@ -20,6 +18,7 @@ T2011 <- read.csv("TALLAS2011.csv", sep=";")
 T2012 <- read.csv("TALLAS2012.csv", sep=";")
 
 columnas <- c("Fecha", "Latitud", "Longitud", "Tipo", "Talla")
+columnas2 <- c("Diego es puto")
 
 colnames(T2003) <- columnas
 colnames(T2004) <- columnas
