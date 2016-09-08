@@ -1,4 +1,4 @@
-function f = satesst(year)
+function satesst(year)
 
 F1 = ftp('podaac-ftp.jpl.nasa.gov'); %crear el ftp
 data_save = pwd(); %Directorio donde se guarda
