@@ -16,6 +16,10 @@ ONI_SOI <- read.csv("Datos/Oc/ONI_SOI.csv", sep = ";") %>%
   mutate(AnoMes = paste(Ano, Mes, sep = "-")) %>%
   select(AnoMes, ONI = oni, SOI = soi)
 
+## Cargar datos Temp
+
+Temp <- read.csv("Datos/Oc/Temp.csv")
+
 ## Cargar datos Atún
 
 T2003 <- read.csv("./Datos/Atun/TALLAS2003.csv", sep=";")
@@ -78,7 +82,10 @@ T_todos <- T_todos %>%
   select(ID, AnoMes, Dia, Mes, Ano, Fecha, Tipo, Latitud, Longitud, Talla) %>%
   left_join(MEI, by = "AnoMes") %>%
   left_join(ONI_SOI, by = "AnoMes") #%>%
-  #left_join(Temp)
+  left_join(Temp, by = ID)
 
-write.csv(T_todos, file = "./Datos/Atun/T_todos.csv", row.names = F)
+datos <- T_todos
 
+write.csv(datos, file = "./Datos/Atun/BD_TallasAtun_Oc.csv", row.names = F)
+#writeMat("./Datos/Atun/BD_TallasAtun_Oc.csv", datos = datos)
+save(datos, file = "./Datos/Atun/BD_TallasAtun_Oc.RData")
