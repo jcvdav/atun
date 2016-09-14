@@ -1,5 +1,4 @@
 *.Rhistory
-*.RData
 *.asv
 .Rproj.user
 *.Rproj
