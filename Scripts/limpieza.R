@@ -91,5 +91,4 @@ T_todos <- T_todos %>%
 datos <- T_todos
 
 write.csv(datos, file = "./Datos/Atun/BD_TallasAtun_Oc.csv", row.names = F)
-#writeMat("./Datos/Atun/BD_TallasAtun_Oc.csv", datos = datos)
 save(datos, file = "./Datos/Atun/BD_TallasAtun_Oc.RData")
