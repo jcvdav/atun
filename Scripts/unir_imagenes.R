@@ -4,7 +4,7 @@ library(tidyr)
 library(dplyr)
 library(readr)
 
-for (i in 2010:2014){
+for (i in 2003:2014){
   
   img_data <- data.frame(Ano = NA, Mes = NA, Lat = NA, Lon = NA, Temp = NA)
   
@@ -33,10 +33,36 @@ for (i in 2010:2014){
 
 # Leer los 14 RDatas anuales
 
+load("Datos/Oc/Temp_2003.RData")
+load("Datos/Oc/Temp_2004.RData")
+load("Datos/Oc/Temp_2005.RData")
+load("Datos/Oc/Temp_2006.RData")
+load("Datos/Oc/Temp_2007.RData")
+load("Datos/Oc/Temp_2008.RData")
+load("Datos/Oc/Temp_2009.RData")
+load("Datos/Oc/Temp_2010.RData")
+load("Datos/Oc/Temp_2011.RData")
+load("Datos/Oc/Temp_2012.RData")
+load("Datos/Oc/Temp_2013.RData")
+load("Datos/Oc/Temp_2014.RData")
+
 #Concatenar los datos
 
+img_data <- rbind(T2003,
+                  T2004,
+                  T2005,
+                  T2006,
+                  T2007,
+                  T2008,
+                  T2009,
+                  T2010,
+                  T2011,
+                  T2012,
+                  T2013,
+                  T2014)
+
 img_data <- mutate(img_data,
-                   Lon = -1*abs(data$Lon),
+                   Lon = -1*abs(Lon),
                    ID = paste(Ano, Mes, Lon, Lat, sep = "-"))
 
 save(img_data, file = paste("Datos/Oc/Temp.RData"))
