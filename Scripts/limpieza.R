@@ -1,6 +1,7 @@
 library(ggplot2)
 library(dplyr)
 library(tidyr)
+library(readr)
 
 ## Cargar datos MEI
 MEI <- read.csv("./Datos/Oc/MEI_mensual.csv", sep=";") %>%
@@ -18,7 +19,10 @@ ONI_SOI <- read.csv("Datos/Oc/ONI_SOI.csv", sep = ";") %>%
 
 ## Cargar datos Temp
 
-Temp <- read.csv("Datos/Oc/Temp.csv")
+load("Datos/Oc/Temp.RData")
+
+Temp <- img_data %>%
+  select(ID, Temp)
 
 ## Cargar datos Atún
 
@@ -81,8 +85,8 @@ T_todos <- T_todos %>%
          ID = paste(Ano, Mes, Longitud, Latitud, sep = "-")) %>%
   select(ID, AnoMes, Dia, Mes, Ano, Fecha, Tipo, Latitud, Longitud, Talla) %>%
   left_join(MEI, by = "AnoMes") %>%
-  left_join(ONI_SOI, by = "AnoMes") #%>%
-  left_join(Temp, by = ID)
+  left_join(ONI_SOI, by = "AnoMes") %>%
+  datos <- left_join(datos, Temp, by = "ID")
 
 datos <- T_todos
 
