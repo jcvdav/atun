@@ -79,7 +79,7 @@ T_todos <- T_todos %>%
   filter(Longitud > -180) %>%
   filter(Latitud < 50) %>%
   filter(Talla < 300) %>%
-  filter(Ano > 2000) %>%
+  filter(Ano > 2002) %>%
   filter(Talla < 500) %>%
   mutate(AnoMes = paste(Ano, Mes, sep="-"),
          ID = paste(Ano, Mes, Longitud, Latitud, sep = "-")) %>%
@@ -92,3 +92,8 @@ datos <- T_todos
 
 write.csv(datos, file = "./Datos/Atun/BD_TallasAtun_Oc.csv", row.names = F)
 save(datos, file = "./Datos/Atun/BD_TallasAtun_Oc.RData")
+
+# Check for NAs
+for (i in 1:length(datos)){
+  print(paste(i, sum(is.na(datos[i])), sep = "-"))
+}
