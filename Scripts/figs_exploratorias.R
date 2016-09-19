@@ -95,7 +95,12 @@ tiff("./Docs/Figs/Fig5.tiff", width=8, height=12, units="in", res=300)
 p5
 dev.off()
 
+
 # Tallas vs Latitud
+
+#########################################
+datos <- filter(datos, Tipo == LANATUN)## Filtrado por tipo
+#########################################
 
 p6 <- group_by(datos, Ano, Latitud) %>%
   summarize(Talla = mean(Talla, na.rm = T)) %>%
@@ -190,4 +195,18 @@ dev.off()
 
 # 
 
-t15 <- group_by
+Talla <- group_by(datos, Ano, Mes) %>%
+  summarize(Talla = mean(Talla, na.rm = T)) %>%
+  ungroup() %>%
+  complete(Ano, Mes, fill = list (Talla = NA)) %>%
+  select(Talla) %>%
+  ts(frequency = 12, start = c(2003, 1))
+
+MEI <- group_by(datos, Ano, Mes) %>%
+  summarize(MEI = mean(MEI)) %>%
+  ungroup() %>%
+  complete(Ano, Mes, fill = list(MEI = NA)) %>%
+  select(MEI) %>%
+  ts(frequency = 12, start = c(2003, 1))
+
+acf(ts.union(Talla, MEI))
