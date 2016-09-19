@@ -43,10 +43,13 @@ p2
 dev.off()
 
 # Promedio anual de tallas por tipo de lance
-p3 <- ggplot(datos, aes(x = Ano, y = Talla, color = Tipo, factor = Tipo)) +
-  stat_summary(fun.y = mean, geom = "point") +
-  stat_summary(fun.y = mean, geom = "line") +
-  stat_summary(fun.data = mean_cl_normal, geom = "errorbar", fun.args = list(mult = 1), width = 0.2, color = "black") +
+
+p3 <- group_by(datos, Ano, Tipo) %>%
+  summarize(MTalla = mean(Talla, na.rm = T), SDTalla = sd(Talla, na.rm = T)) %>%
+  ggplot(aes(x = Ano, y = MTalla, color = Tipo, factor = Tipo)) +
+  geom_point() +
+  geom_line() +
+  geom_errorbar(aes(ymin = MTalla - SDTalla, ymax = MTalla + SDTalla), color = "black", width = 0.2) +
   scale_color_brewer(palette = "Set1") +
   theme_bw() + 
   scale_x_continuous(breaks = seq(2003,2014))
@@ -92,40 +95,67 @@ tiff("./Docs/Figs/Fig5.tiff", width=8, height=12, units="in", res=300)
 p5
 dev.off()
 
-# Algo
+# Tallas vs Latitud
 
-Colors <- colorRampPalette(brewer.pal(9,"RdBu"))
+p6 <- group_by(datos, Ano, Latitud) %>%
+  summarize(Talla = mean(Talla, na.rm = T)) %>%
+  ggplot(aes(x = Latitud, y = Talla, color = Ano)) + 
+  geom_point()
 
 tiff("./Docs/Figs/Fig6.tiff", width=6, height=3, units="in", res=300)
 p6
 dev.off()
 
-# Algo
+# Tallas vs. Longitud
+p7 <- group_by(datos, Ano, Longitud) %>%
+  summarize(Talla = mean(Talla, na.rm = T)) %>%
+  ggplot(aes(x = Longitud, y = Talla, color = Ano)) + 
+  geom_point()
 
 tiff("./Docs/Figs/Fig7.tiff", width=6, height=3, units="in", res=300)
 p7
 dev.off()
 
-# Algo
+# Talla vs. MEI
+
+p8 <- group_by(datos, Ano, MEI) %>%
+  summarize(Talla = mean(Talla, na.rm = T)) %>%
+  ggplot(aes(x = MEI, y = Talla, color = Ano)) + 
+  geom_point()
 
 tiff("./Docs/Figs/Fig8.tiff", width=6, height=3, units="in", res=300)
 p8
 dev.off()
 
-# Algo
+# Talla vs. ONI
+
+p9 <- group_by(datos, Ano, ONI) %>%
+  summarize(Talla = mean(Talla, na.rm = T)) %>%
+  ggplot(aes(x = ONI, y = Talla, color = Ano)) + 
+  geom_point()
 
 tiff("./Docs/Figs/Fig9.tiff", width=6, height=3, units="in", res=300)
 p9
 dev.off()
 
-# Algo
-
+# Talla vs. SOI
+ p10 <- group_by(datos, Ano, SOI) %>%
+   summarize(Talla = mean(Talla, na.rm = T)) %>%
+   ggplot(aes(x = SOI, y = Talla, color = Ano)) + 
+   geom_point()
 
 tiff("./Docs/Figs/Fig10.tiff", width=6, height=3, units="in", res=300)
 p10
 dev.off()
 
+# Tallas vs. Temp
+
+p11 <- group_by(datos, Ano, Temp) %>%
+  summarize(Talla = mean(Talla, na.rm = T)) %>%
+  ggplot(aes(x = Temp, y = Talla, color = Ano)) + 
+  geom_point(size = .5)
+
 
 tiff("./Docs/Figs/Fig11.tiff", width=6, height=3, units="in", res=300)
-p10
+p11
 dev.off()
