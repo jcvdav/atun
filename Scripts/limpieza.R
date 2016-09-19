@@ -21,7 +21,7 @@ ONI_SOI <- read.csv("Datos/Oc/ONI_SOI.csv", sep = ";") %>%
 
 load("Datos/Oc/Temp.RData")
 
-Temp <- img_data %>%
+Temp <- Temp %>%
   select(ID, Temp)
 
 ## Cargar datos Atún
@@ -86,7 +86,8 @@ T_todos <- T_todos %>%
   select(ID, AnoMes, Dia, Mes, Ano, Fecha, Tipo, Latitud, Longitud, Talla) %>%
   left_join(MEI, by = "AnoMes") %>%
   left_join(ONI_SOI, by = "AnoMes") %>%
-  datos <- left_join(datos, Temp, by = "ID")
+  left_join(Temp, by = "ID")
+
 
 datos <- T_todos
 

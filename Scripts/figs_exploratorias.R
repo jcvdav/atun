@@ -100,7 +100,8 @@ dev.off()
 p6 <- group_by(datos, Ano, Latitud) %>%
   summarize(Talla = mean(Talla, na.rm = T)) %>%
   ggplot(aes(x = Latitud, y = Talla, color = Ano)) + 
-  geom_point()
+  geom_point() +
+  theme_bw()
 
 tiff("./Docs/Figs/Fig6.tiff", width=6, height=3, units="in", res=300)
 p6
@@ -110,7 +111,8 @@ dev.off()
 p7 <- group_by(datos, Ano, Longitud) %>%
   summarize(Talla = mean(Talla, na.rm = T)) %>%
   ggplot(aes(x = Longitud, y = Talla, color = Ano)) + 
-  geom_point()
+  geom_point() +
+  theme_bw()
 
 tiff("./Docs/Figs/Fig7.tiff", width=6, height=3, units="in", res=300)
 p7
@@ -121,7 +123,8 @@ dev.off()
 p8 <- group_by(datos, Ano, MEI) %>%
   summarize(Talla = mean(Talla, na.rm = T)) %>%
   ggplot(aes(x = MEI, y = Talla, color = Ano)) + 
-  geom_point()
+  geom_point() +
+  theme_bw()
 
 tiff("./Docs/Figs/Fig8.tiff", width=6, height=3, units="in", res=300)
 p8
@@ -132,7 +135,8 @@ dev.off()
 p9 <- group_by(datos, Ano, ONI) %>%
   summarize(Talla = mean(Talla, na.rm = T)) %>%
   ggplot(aes(x = ONI, y = Talla, color = Ano)) + 
-  geom_point()
+  geom_point() +
+  theme_bw()
 
 tiff("./Docs/Figs/Fig9.tiff", width=6, height=3, units="in", res=300)
 p9
@@ -142,7 +146,8 @@ dev.off()
  p10 <- group_by(datos, Ano, SOI) %>%
    summarize(Talla = mean(Talla, na.rm = T)) %>%
    ggplot(aes(x = SOI, y = Talla, color = Ano)) + 
-   geom_point()
+   geom_point() +
+   theme_bw()
 
 tiff("./Docs/Figs/Fig10.tiff", width=6, height=3, units="in", res=300)
 p10
@@ -150,12 +155,39 @@ dev.off()
 
 # Tallas vs. Temp
 
-p11 <- group_by(datos, Ano, Temp) %>%
+p11 <- group_by(datos, Ano, Mes, Temp) %>%
   summarize(Talla = mean(Talla, na.rm = T)) %>%
   ggplot(aes(x = Temp, y = Talla, color = Ano)) + 
-  geom_point(size = .5)
+  geom_point(size = .5) +
+  theme_bw()
 
 
 tiff("./Docs/Figs/Fig11.tiff", width=6, height=3, units="in", res=300)
 p11
 dev.off()
+
+# Hovmoller tallas
+
+t13 <- group_by(datos, Ano, Mes) %>%
+  summarize(Talla = mean(Talla, na.rm = T)) %>%
+  spread(Ano, Talla) %>%
+  as.matrix()
+
+tiff("./Docs/Figs/Fig13.tiff", width=6, height=4, units="in", res=300)
+filled.contour(x = t13[,1], y = seq(1:12)+2002, z = t13[,2:13], color.palette=heat.colors)
+dev.off()
+
+# Hovmoller tallas (sd)
+
+t14 <- group_by(datos, Ano, Mes) %>%
+  summarize(Talla = sd(Talla, na.rm = T)) %>%
+  spread(Ano, Talla) %>%
+  as.matrix()
+
+tiff("./Docs/Figs/Fig14.tiff", width=6, height=4, units="in", res=300)
+filled.contour(x = t14[,1], y = seq(1:12)+2002, z = t14[,2:13], color.palette=heat.colors)
+dev.off()
+
+# 
+
+t15 <- group_by
