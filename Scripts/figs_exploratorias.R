@@ -35,11 +35,14 @@ dev.off()
 
 # Corrplot
 datos2 <- filter(datos, !is.na(MEI)) %>%
-  filter(!is.na(Temp))
-p2 <- corrplot(cor(datos2[,8:14]), method="ellipse", type="lower")
+  filter(!is.na(Temp)) %>%
+  group_by(Ano, Mes, Latitud, Longitud, MEI, ONI, SOI, Temp) %>%
+  summarize(Talla = mean(Talla, na.rm = T)) %>%
+  ungroup() %>%
+  select(-Mes)
 
 tiff("./Docs/Figs/Fig2.tiff", width=6, height=3, units="in", res=300)
-p2
+corrplot(cor(datos2), method="ellipse", type="lower")
 dev.off()
 
 # Promedio anual de tallas por tipo de lance
@@ -99,25 +102,41 @@ dev.off()
 # Tallas vs Latitud
 
 #########################################
-datos <- filter(datos, Tipo == LANATUN)## Filtrado por tipo
+datos <- filter(datos, Tipo == "LANATUN")## Filtrado por tipo
 #########################################
+
+t6 <- group_by(datos, Ano, Latitud) %>%
+  summarize(Talla = mean(Talla, na.rm = T)) %>%
+  ungroup()
+
+m6 <- lm(Talla~Latitud, t6)
 
 p6 <- group_by(datos, Ano, Latitud) %>%
   summarize(Talla = mean(Talla, na.rm = T)) %>%
   ggplot(aes(x = Latitud, y = Talla, color = Ano)) + 
   geom_point() +
-  theme_bw()
+  theme_bw() +
+  geom_abline(slope = coef(m6)[[2]], intercept = coef(m6)[[1]])
+
 
 tiff("./Docs/Figs/Fig6.tiff", width=6, height=3, units="in", res=300)
 p6
 dev.off()
 
 # Tallas vs. Longitud
+
+t7 <- group_by(datos, Ano, Longitud) %>%
+  summarize(Talla = mean(Talla, na.rm = T)) %>%
+  ungroup()
+
+m7 <- lm(Talla~Longitud, t7)
+  
 p7 <- group_by(datos, Ano, Longitud) %>%
   summarize(Talla = mean(Talla, na.rm = T)) %>%
   ggplot(aes(x = Longitud, y = Talla, color = Ano)) + 
   geom_point() +
-  theme_bw()
+  theme_bw() +
+  geom_abline(slope = coef(m7)[[2]], intercept = coef(m7)[[1]])
 
 tiff("./Docs/Figs/Fig7.tiff", width=6, height=3, units="in", res=300)
 p7
@@ -125,11 +144,18 @@ dev.off()
 
 # Talla vs. MEI
 
-p8 <- group_by(datos, Ano, MEI) %>%
+t8 <- group_by(datos, Ano, Mes, MEI) %>%
+  summarize(Talla = mean(Talla, na.rm = T)) %>%
+  ungroup()
+
+m8 <- lm(Talla~MEI, t8)
+
+p8 <- group_by(datos, Ano, Mes, MEI) %>%
   summarize(Talla = mean(Talla, na.rm = T)) %>%
   ggplot(aes(x = MEI, y = Talla, color = Ano)) + 
   geom_point() +
-  theme_bw()
+  theme_bw() +
+  geom_abline(slope = coef(m8)[[2]], intercept = coef(m8)[[1]])
 
 tiff("./Docs/Figs/Fig8.tiff", width=6, height=3, units="in", res=300)
 p8
@@ -137,22 +163,37 @@ dev.off()
 
 # Talla vs. ONI
 
-p9 <- group_by(datos, Ano, ONI) %>%
+t9 <- group_by(datos, Ano, Mes, ONI) %>%
+  summarize(Talla = mean(Talla, na.rm = T)) %>%
+  ungroup()
+
+m9 <- lm(Talla~ONI, t9)
+
+p9 <- group_by(datos, Ano, Mes, ONI) %>%
   summarize(Talla = mean(Talla, na.rm = T)) %>%
   ggplot(aes(x = ONI, y = Talla, color = Ano)) + 
   geom_point() +
-  theme_bw()
+  theme_bw() +
+  geom_abline(slope = coef(m9)[[2]], intercept = coef(m9)[[1]])
 
 tiff("./Docs/Figs/Fig9.tiff", width=6, height=3, units="in", res=300)
 p9
 dev.off()
 
 # Talla vs. SOI
- p10 <- group_by(datos, Ano, SOI) %>%
+
+t10 <- group_by(datos, Ano, Mes, SOI) %>%
+  summarize(Talla = mean(Talla, na.rm = T)) %>%
+  ungroup()
+
+m10 <- lm(Talla~SOI, t10)
+
+ p10 <- group_by(datos, Ano, Mes, SOI) %>%
    summarize(Talla = mean(Talla, na.rm = T)) %>%
    ggplot(aes(x = SOI, y = Talla, color = Ano)) + 
    geom_point() +
-   theme_bw()
+   theme_bw() +
+   geom_abline(slope = coef(m10)[[2]], intercept = coef(m10)[[1]])
 
 tiff("./Docs/Figs/Fig10.tiff", width=6, height=3, units="in", res=300)
 p10
@@ -160,16 +201,35 @@ dev.off()
 
 # Tallas vs. Temp
 
-p11 <- group_by(datos, Ano, Mes, Temp) %>%
+t11 <- filter(datos, Temp < 40) %>%
+  group_by(Ano, Mes, Latitud, Longitud, Temp) %>%
+  summarize(Talla = mean(Talla, na.rm = T)) %>%
+  ungroup()
+
+m11 <- lm(Talla~Temp, t11)
+
+p11 <- filter(datos, Temp < 40) %>%
+  group_by(Ano, Mes, Latitud, Longitud, Temp) %>%
   summarize(Talla = mean(Talla, na.rm = T)) %>%
   ggplot(aes(x = Temp, y = Talla, color = Ano)) + 
   geom_point(size = .5) +
-  theme_bw()
+  theme_bw() +
+  geom_abline(slope = coef(m11)[[2]], intercept = coef(m11)[[1]])
 
 
 tiff("./Docs/Figs/Fig11.tiff", width=6, height=3, units="in", res=300)
 p11
 dev.off()
+
+# Tabla modelos
+
+t12 <- group_by(datos, Ano, Mes, Latitud, Longitud, MEI, ONI, SOI, Temp) %>%
+  summarize(Talla = mean(Talla)) %>%
+  ungroup()
+
+m12 <- lm(Talla ~ Latitud + Longitud + Ano, t12)
+
+stargazer(m6, m7, m8, m9, m10, m11, type = "html", dep.var.labels = c("Talla (cm)"), covariate.labels = c("Latitud", "Longitud", "MEI", "ONI", "SOI", "Temperatura (°C)"), out = "./Docs/Figs/Tabla1.htm")
 
 # Hovmoller tallas
 
@@ -210,3 +270,11 @@ MEI <- group_by(datos, Ano, Mes) %>%
   ts(frequency = 12, start = c(2003, 1))
 
 acf(ts.union(Talla, MEI))
+
+# Barras Temp vs Talla
+
+p15 <- filter(datos, Temp < 40) %>%
+  group_by(Ano, Mes, Latitud, Longitud, Temp) %>%
+  summarize(Talla = mean(Talla, na.rm = T), N = n()) %>%
+  ggplot(aes(x = Temp, y = N)) +
+  geom_point()
