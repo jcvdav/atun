@@ -102,7 +102,7 @@ dev.off()
 # Tallas vs Latitud
 
 #########################################
-datos <- filter(datos, Tipo == "LANATUN")## Filtrado por tipo
+# datos <- filter(datos, Tipo == "LANATUN")## Filtrado por tipo
 #########################################
 
 t6 <- group_by(datos, Ano, Latitud) %>%
@@ -144,14 +144,14 @@ dev.off()
 
 # Talla vs. MEI
 
-t8 <- group_by(datos, Ano, Mes, MEI) %>%
-  summarize(Talla = mean(Talla, na.rm = T)) %>%
+t8 <- group_by(datos, Ano, Mes) %>%
+  summarize(MEI = mean(MEI, na.rm = T), Talla = mean(Talla, na.rm = T)) %>%
   ungroup()
 
 m8 <- lm(Talla~MEI, t8)
 
-p8 <- group_by(datos, Ano, Mes, MEI) %>%
-  summarize(Talla = mean(Talla, na.rm = T)) %>%
+p8 <- group_by(datos, Ano, Mes) %>%
+  summarize(MEI = mean(MEI, na.rm = T), Talla = mean(Talla, na.rm = T)) %>%
   ggplot(aes(x = MEI, y = Talla, color = Ano)) + 
   geom_point() +
   theme_bw() +
@@ -163,14 +163,14 @@ dev.off()
 
 # Talla vs. ONI
 
-t9 <- group_by(datos, Ano, Mes, ONI) %>%
-  summarize(Talla = mean(Talla, na.rm = T)) %>%
+t9 <- group_by(datos, Ano, Mes) %>%
+  summarize(ONI = mean(ONI, na.rm = T), Talla = mean(Talla, na.rm = T)) %>%
   ungroup()
 
 m9 <- lm(Talla~ONI, t9)
 
-p9 <- group_by(datos, Ano, Mes, ONI) %>%
-  summarize(Talla = mean(Talla, na.rm = T)) %>%
+p9 <- group_by(datos, Ano, Mes) %>%
+  summarize(ONI = mean(ONI, na.rm = T), Talla = mean(Talla, na.rm = T)) %>%
   ggplot(aes(x = ONI, y = Talla, color = Ano)) + 
   geom_point() +
   theme_bw() +
@@ -182,14 +182,14 @@ dev.off()
 
 # Talla vs. SOI
 
-t10 <- group_by(datos, Ano, Mes, SOI) %>%
-  summarize(Talla = mean(Talla, na.rm = T)) %>%
+t10 <- group_by(datos, Ano, Mes) %>%
+  summarize(SOI = mean(SOI, na.rm = T), Talla = mean(Talla, na.rm = T)) %>%
   ungroup()
 
 m10 <- lm(Talla~SOI, t10)
 
- p10 <- group_by(datos, Ano, Mes, SOI) %>%
-   summarize(Talla = mean(Talla, na.rm = T)) %>%
+ p10 <- group_by(datos, Ano, Mes) %>%
+   summarize(SOI = mean(SOI, na.rm = T), Talla = mean(Talla, na.rm = T)) %>%
    ggplot(aes(x = SOI, y = Talla, color = Ano)) + 
    geom_point() +
    theme_bw() +
@@ -202,17 +202,17 @@ dev.off()
 # Tallas vs. Temp
 
 t11 <- filter(datos, Temp < 40) %>%
-  group_by(Ano, Mes, Latitud, Longitud, Temp) %>%
-  summarize(Talla = mean(Talla, na.rm = T)) %>%
+  group_by(Ano, Mes, Latitud, Longitud) %>%
+  summarize(Temp = mean(Temp, na.rm = T), Talla = mean(Talla, na.rm = T)) %>%
   ungroup()
 
 m11 <- lm(Talla~Temp, t11)
 
 p11 <- filter(datos, Temp < 40) %>%
-  group_by(Ano, Mes, Latitud, Longitud, Temp) %>%
-  summarize(Talla = mean(Talla, na.rm = T)) %>%
+  group_by(Ano, Mes, Latitud, Longitud) %>%
+  summarize(Temp = mean(Temp, na.rm = T), Talla = mean(Talla, na.rm = T)) %>%
   ggplot(aes(x = Temp, y = Talla, color = Ano)) + 
-  geom_point(size = .5) +
+  geom_point() +
   theme_bw() +
   geom_abline(slope = coef(m11)[[2]], intercept = coef(m11)[[1]])
 
@@ -223,13 +223,23 @@ dev.off()
 
 # Tabla modelos
 
-t12 <- group_by(datos, Ano, Mes, Latitud, Longitud, MEI, ONI, SOI, Temp) %>%
-  summarize(Talla = mean(Talla)) %>%
+stargazer(m6, m7, m8, m9, m10, m11, type = "html", dep.var.labels = c("Talla (cm)"), covariate.labels = c("Latitud", "Longitud", "MEI", "ONI", "SOI", "Temperatura (°C)"), out = "./Docs/Figs/Tabla1.htm")
+
+# Modelo multiple
+
+t12 <- group_by(Ano, Mes, Latitud, Longitud) %>%
+  summarize(MEI = mean(MEI, na.rm = T),
+            SOI = mean(SOI, na.rm = T),
+            ONI = mean(ONI, na.rm = T),
+            Temp = mean(Temp, na.rm = T),
+            Talla = mean(Talla, na.rm = T)) %>%
   ungroup()
 
-m12 <- lm(Talla ~ Latitud + Longitud + Ano, t12)
+m12 <- lm(Talla ~ MEI + ONI + SOI + Temp, t12)
 
-stargazer(m6, m7, m8, m9, m10, m11, type = "html", dep.var.labels = c("Talla (cm)"), covariate.labels = c("Latitud", "Longitud", "MEI", "ONI", "SOI", "Temperatura (°C)"), out = "./Docs/Figs/Tabla1.htm")
+m13 <- lm(Talla ~ MEI*ONI, t12)
+
+stargazer(m12, m13, type = "html", dep.var.labels = c("Talla (cm)"), covariate.labels = c("MEI", "ONI", "SOI", "Temperatura (°C)"), out = "./Docs/Figs/Tabla2.htm", keep.stat = c("adj.rsq", "aic", "n", "f"))
 
 # Hovmoller tallas
 
@@ -263,13 +273,16 @@ Talla <- group_by(datos, Ano, Mes) %>%
   ts(frequency = 12, start = c(2003, 1))
 
 MEI <- group_by(datos, Ano, Mes) %>%
-  summarize(MEI = mean(MEI)) %>%
+  summarize(MEI = mean(Temp)) %>%
   ungroup() %>%
   complete(Ano, Mes, fill = list(MEI = NA)) %>%
   select(MEI) %>%
   ts(frequency = 12, start = c(2003, 1))
 
-acf(ts.union(Talla, MEI))
+TS <- ts.intersect(Talla, MEI, dframe = T)
+selected <- !is.na(TS$Talla) & !is.na(TS$MEI)
+TS <- TS[selected,]
+acf(TS)
 
 # Barras Temp vs Talla
 
