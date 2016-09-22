@@ -227,7 +227,7 @@ stargazer(m6, m7, m8, m9, m10, m11, type = "html", dep.var.labels = c("Talla (cm
 
 # Modelo multiple
 
-t12 <- group_by(Ano, Mes, Latitud, Longitud) %>%
+t12 <- group_by(datos, Ano, Mes, Latitud, Longitud) %>%
   summarize(MEI = mean(MEI, na.rm = T),
             SOI = mean(SOI, na.rm = T),
             ONI = mean(ONI, na.rm = T),
@@ -235,11 +235,17 @@ t12 <- group_by(Ano, Mes, Latitud, Longitud) %>%
             Talla = mean(Talla, na.rm = T)) %>%
   ungroup()
 
-m12 <- lm(Talla ~ MEI + ONI + SOI + Temp, t12)
+m12 <- lm(Talla ~ Latitud + Longitud + MEI + ONI + SOI + Temp, t12)
 
 m13 <- lm(Talla ~ MEI*ONI, t12)
 
-stargazer(m12, m13, type = "html", dep.var.labels = c("Talla (cm)"), covariate.labels = c("MEI", "ONI", "SOI", "Temperatura (°C)"), out = "./Docs/Figs/Tabla2.htm", keep.stat = c("adj.rsq", "aic", "n", "f"))
+m14 <- lm(Talla ~ Latitud + Longitud + MEI * ONI * Temp, t12)
+
+m15 <- lm(Talla ~ Latitud + Longitud + MEI * Temp, t12)
+
+
+
+stargazer(m12, m13, m14, m15, type = "html", dep.var.labels = c("Talla (cm)"), out = "./Docs/Figs/Tabla2.htm", keep.stat = c("adj.rsq", "aic", "n", "f"), add.lines = list(c("AIC", "42421.88", "43121.27", "42425.50", "42429.26")), single.row = T)
 
 # Hovmoller tallas
 
