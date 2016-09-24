@@ -7,6 +7,7 @@ library(RColorBrewer)
 library(hexbin)
 library(corrplot)
 library(maps)
+library(stargazer)
 
 
 load(file = "./Datos/Atun/BD_TallasAtun_Oc.RData")
@@ -269,31 +270,52 @@ tiff("./Docs/Figs/Fig14.tiff", width=6, height=4, units="in", res=300)
 filled.contour(x = t14[,1], y = seq(1:12)+2002, z = t14[,2:13], color.palette=heat.colors)
 dev.off()
 
-# 
+# Barras Temp vs Talla
+
+hist(datos$Temp, main = "")
+
+# Densidad de puntos en el mapa
+
+Colors=colorRampPalette(brewer.pal(9,"RdBu"))
+
+hexbinplot(datos$Latitud ~ datos$Longitud, xlab = "Longitud", ylab = "Latitud", colramp = Colors)
+
+# Descomponer Tallas
 
 Talla <- group_by(datos, Ano, Mes) %>%
   summarize(Talla = mean(Talla, na.rm = T)) %>%
   ungroup() %>%
   complete(Ano, Mes, fill = list (Talla = NA)) %>%
   select(Talla) %>%
-  ts(frequency = 12, start = c(2003, 1))
+  ts(frequency = 12, start = c(2003, 1)) %>%
+  na.spline() %>%
+  decompose()
 
-MEI <- group_by(datos, Ano, Mes) %>%
-  summarize(MEI = mean(Temp)) %>%
-  ungroup() %>%
-  complete(Ano, Mes, fill = list(MEI = NA)) %>%
-  select(MEI) %>%
-  ts(frequency = 12, start = c(2003, 1))
+# Descomponer MEI
 
-TS <- ts.intersect(Talla, MEI, dframe = T)
-selected <- !is.na(TS$Talla) & !is.na(TS$MEI)
-TS <- TS[selected,]
-acf(TS)
+MEI <- read.csv("./Datos/Oc/MEI_mensual.csv", sep=";") %>%
+  complete(Year, Month, fill = list(Mei = NA)) %>%
+  select(Mei) %>%
+  ts(frequency = 12, start = c(1950, 1)) %>%
+  na.spline() %>%
+  decompose()  
 
-# Barras Temp vs Talla
+#Descomponer ONI
 
-p15 <- filter(datos, Temp < 40) %>%
-  group_by(Ano, Mes, Latitud, Longitud, Temp) %>%
-  summarize(Talla = mean(Talla, na.rm = T), N = n()) %>%
-  ggplot(aes(x = Temp, y = N)) +
-  geom_point()
+ONI <- read.csv("Datos/Oc/ONI_SOI.csv", sep = ";") %>%
+  complete(Ano, Mes, fill = list(oni = NA, Dia = 15)) %>%
+  select(oni) %>%
+  ts(frequency = 12, start = c(1950, 1)) %>%
+  decompose()
+
+#Descomponer SOI
+
+SOI <- read.csv("Datos/Oc/ONI_SOI.csv", sep = ";") %>%
+  complete(Ano, Mes, fill = list(soi = NA, Dia = 15)) %>%
+  select(soi) %>%
+  ts(frequency = 12, start = c(1950, 1)) %>%
+  decompose()
+
+
+
+
