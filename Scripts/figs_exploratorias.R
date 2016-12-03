@@ -1,13 +1,11 @@
 # Figuras exploratoria
 
-library(ggplot2)
-library(tidyr)
-library(dplyr)
 library(RColorBrewer)
 library(hexbin)
 library(corrplot)
 library(maps)
 library(stargazer)
+library(tidyverse)
 
 
 load(file = "./Datos/Atun/BD_TallasAtun_Oc.RData")
