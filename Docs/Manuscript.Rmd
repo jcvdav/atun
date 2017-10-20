@@ -1,0 +1,338 @@
+---
+output: html_notebook
+---
+
+# Cover Page
+
+**Title**
+
+**Authors**
+
+VILLASEÑOR-DERBEZ, J.C.$^1$, DREYFUS-LEON, M.J.$^{2,3}$
+
+1 Bren School of Environmental Science & Management, University of California Santa Barbara, Santa Barbara CA 93106, USA.
+
+2 Instituto Nacional de la Pesca, Centro Regional de Investigación Acuícola y Pesquera Ensenada, Carretera Tijuana-Ensenada Km 97.5, Parque Industrial FONDEPORT, El Sauzal de Rodríguez, CP 22760 Ensenada, Baja California, México.
+
+3 Facultad de Ciencias Marinas, Universidad Autónoma de Baja California, Km. 103 Carretera Tijuana-Ensenada, Ensenada CP 22860, Baja California, México.
+
+**Corresponding author**
+
+Juan Carlos Villaseñor-Derbez
+
+juancarlos.villader@gmail.com
+
+Laurel Walk 787-C, Goleta, CA, 93117
+
+(207)-205-8435
+
+**Running title**
+
+
+# ABSTRACT
+
+Each article should include a one-paragraph abstract of not more than 250 words that begins on a separate page and is complete without reference to the text.  Key words for indexing should be listed at the end of the abstract.
+
+Key words:
+
+# INTRODUCTION
+
+# MATERIALS AND METHODS
+
+## Tallas de atún
+
+Las tallas fueron recopiladas por observadores a bordo de embarcaciones de la flota atunera mexicana. Los observadores toman la longitud furcal (cm) de una porción de cada lance. Adicionalmente, registran el tipo de lance (cardúmenes asociados a delfines, cardúmenes libres o cardúmenes asociados a objetos agregadores), la fecha y la posición geográfica, permitiéndonos georreferenciar las mediciones. La información comprendida en este estudio fue recopilada entre Enero del 2003 y Noviembre del 2014, exceptuando los meses donde una veda ha sido implementada.
+
+Se midieron un total de 322,162 organismos, con un tamaño mínimo de muestra de 28 mediciones para Enero del 2014 y un máximo de 6663 mediciones para Abril del 2005. El año con menos muestras (n = 15,533) fue el 2009 y el año con más muestras fue 2003 (n = 31,574). Dada la variabilidad diaria en la pesca, los datos fueron agrupados mensualmente. 
+Las mediciones se realizaron en el Pacífico mexicano, entre los -80° y -140° de longitud, y los 0° y 35° de latitud. Para reducir el esparcimiento de los datos, las coordenadas fueron centradas a la intersección de paralelos y meridianos con un intervalo de 1°. Esto también permitió asignar valores de temperatura superficial del océano y clorofila a.
+
+## Variables oceanográficas
+
+Se utilizaron series de tiempo de los índices climáticos Multivariate ENSO Index (MEI), Oceanic Niño Index (ONI), y el Southern Oscillation Index (SOI). Las series presentan datos mensuales de cada índice, cubriendo la totalidad de la duración del estudio. La serie de tiempo del MEI fue obtenida de Giron-Nava (2016). Las series de tiempo del ONI y el SOI fueron obtenidas de XXXX (XXXX).
+
+Se generó una serie de tiempo para tallas, calculando la media mensual para los 144 meses comprendidos en el estudio. Ante la ausencia de datos, se realizó una interpolación temporal por spline cúbico que permitió eliminar las secciones truncadas. Para la serie de tiempo de tallas de atún, y para los índices climáticos, se realizó una descomposición asumiendo series de tipo aditivas. Los tres componentes utilizados en la descomposición fueron la tendencia total, la estacionalidad, y el ruido, o aleatoriedad.
+Se utilizaron imágenes satelitales de Temperatura superficial del océano y contenido de clorofila A (Chl-a), tomadas por el satélite MODIS-AQUA, obtenidas del PO.DAAC's de la NASA AVHRR (ftp://podaac-ftp.ipl.nasa.gov). Las imágenes representan promedios mensuales con una resolución espacial de 4 X 4 km. Se utilizaron imágenes comprendiendo el periodo de Enero 2003 a Diciembre 2014. Las imágenes fueron procesadas con la versión seaDAS 4.1 de la NASA. La Chl-a se estimó con el algoritmo OC4.v6, y la temperatura con el algoritmo “XXX”. 
+Manejo de datos
+
+El manejo de datos se realizó con MatLab 20015b (The MathWorks Inc., 2015) y RStudio (R Core Team, 2015).
+
+Análisis
+
+GLM? (revisar supuestos)
+
+CCF
+
+Regresión Lineal Múltiple
+
+ANCOVA múltiples vías
+
+# RESULTS
+
+```{r}
+suppressPackageStartupMessages({
+  library(RColorBrewer)
+  library(hexbin)
+  library(corrplot)
+  library(maps)
+  library(stargazer)
+  library(tidyverse)
+  library(colorRamps)
+  library(gganimate)
+  library(ggExtra)
+})
+```
+
+```{r}
+load(file = "../Datos/Atun/BD_TallasAtun_Oc.RData")
+
+desc <- read.csv("../Datos/Atun/Descargas.csv", strip.white = T, stringsAsFactors = F) %>% 
+  gather(Mes, Descarga, -Ano) %>% 
+  mutate(Mes = as.numeric(gsub(pattern = "X", x = .$Mes, replacement = "")))
+
+load(file = "../Datos/Oc/Temp.RData")
+
+datos <- datos %>% 
+  filter(Tipo == "LANMAM") %>% 
+  left_join(desc, by = c("Ano", "Mes"))
+
+```
+
+## Tallas y tamaño de muestra
+
+```{r}
+coastline <- maps::map("world", ylim=c(0,40), xlim=c(-150,-60), plot = F)
+coastline <- data.frame(Lon = coastline$x,
+                        Lat = coastline$y)
+
+ggplot(datos) +
+  stat_density_2d(data = datos2, aes(x = Longitud, y = Latitud, fill = ..level..), geom = "polygon") +
+  geom_point(data = coastline, aes(x = Lon, y = Lat), color = "black", pch = ".") +
+  theme_bw() +
+  facet_wrap(~Ano) +
+  scale_y_continuous(limits = c(0, 35)) +
+  scale_x_continuous(limits = c(-145, -75)) +
+  coord_quickmap()
+```
+
+
+```{r}
+group_by(datos, Ano, Mes) %>%
+  summarize(Talla = mean(Talla, na.rm = T)) %>%
+  ggplot(aes(x = Mes, y = Ano, fill = Talla, z = Talla)) +
+  geom_raster() +
+  geom_contour() +
+  theme_bw() +
+  scale_x_continuous(breaks = seq(1, 12), labels = seq(1, 12), expand = c(0,0)) +
+  scale_y_continuous(breaks = seq(2002, 2015), labels = seq(2002, 2015), expand = c(0,0)) +
+  removeGrid() +
+  scale_fill_gradientn(colours = matlab.like(10))
+
+```
+
+```{r}
+group_by(datos, Ano, Mes) %>%
+  summarize(Talla = sd(Talla, na.rm = T)) %>%
+  ggplot(aes(x = Mes, y = Ano, fill = Talla, z = Talla)) +
+  geom_raster() +
+  geom_contour() +
+  theme_bw() +
+  scale_x_continuous(breaks = seq(1, 12), labels = seq(1, 12), expand = c(0,0)) +
+  scale_y_continuous(breaks = seq(2002, 2015), labels = seq(2002, 2015), expand = c(0,0)) +
+  removeGrid() +
+  scale_fill_gradientn(colours = matlab.like(10))
+```
+
+Figura 4- Desviación estándar de tallas por mes (eje horizontal) y año (eje vertical). Los colores más obscuros y claros indican promedios pequeños y grandes, respectivamente.
+
+```{r}
+ggplot(datos, aes(x = Talla)) +
+  geom_density(fill = "blue", alpha = 0.25) +
+  theme_bw() +
+  geom_vline(xintercept = 103, linetype = "dashed")
+```
+
+```{r}
+ggplot(datos, aes(x = Talla, group = Ano)) +
+  geom_density(fill = "blue", alpha = 0.25) +
+  theme_bw() +
+  geom_vline(xintercept = 103, linetype = "dashed")
+```
+
+
+```{r}
+
+temp2 <- Temp %>% 
+  filter(Temp < 32)
+
+datos %>% 
+  group_by(Ano, Mes, Dia, Latitud, Longitud) %>% 
+  summarize(Temp = mean(Temp, na.rm = T)) %>% 
+  ggplot() +
+  geom_density(aes(x = Temp, fill = "red"), alpha = 0.25) +
+  geom_density(data = temp2, aes(x = Temp, fill = "blue"), alpha = 0.25) +
+  scale_fill_identity(name = "Layer", guide = "legend",labels = c("Ocean", "Tuna")) +
+  theme_bw() +
+  geom_vline(xintercept = 25, linetype = "dashed") +
+  geom_vline(xintercept = 29, linetype = "dashed")
+
+```
+
+```{r}
+jc <- datos %>%
+  group_by(Ano, Mes, Dia, Latitud, Longitud) %>% 
+  summarize(Temp = mean(Temp, na.rm = T))
+
+t.test(x = jc$Temp, y = temp2$Temp)
+
+```
+
+
+```{r}
+month_letters <- data.frame(Mes = seq(1,12),
+                            Let = LETTERS[1:12])
+
+animation <- Temp %>% 
+  left_join(month_letters, by = "Mes") %>% 
+  mutate(Frame = paste(Ano, Let, sep = "-"),
+         Temp = ifelse(Temp < 35, Temp, NA)) %>% 
+  ggplot(aes(x = Lon, y = Lat, fill = Temp, z = Temp, frame = Frame)) +
+  geom_raster() +
+  geom_contour() +
+  scale_fill_gradientn(colours = matlab.like(10)) +
+  coord_quickmap() +
+  scale_y_continuous(expand = c(0,0)) +
+  scale_x_continuous(expand = c(0,0)) +
+  theme(legend.position = "None")
+
+gganimate(animation, filename = "temp.gif", interval = 0.5)
+```
+
+```{r, fig.show='animate'}
+
+datos2 <- datos %>% 
+  group_by(Ano, Mes, Dia, Latitud, Longitud) %>% 
+  count() %>% 
+  left_join(month_letters, by = "Mes") %>% 
+   mutate(Frame = paste(Ano, Let, sep = "-"))
+
+animation2 <- Temp %>% 
+  left_join(month_letters, by = "Mes") %>% 
+  mutate(Frame = paste(Ano, Let, sep = "-"),
+         Temp = ifelse(Temp < 35, Temp, NA)) %>% 
+  ggplot(aes(frame = Frame)) +
+  geom_raster(aes(x = Lon, y = Lat, fill = Temp)) +
+  geom_contour(aes(x = Lon, y = Lat, z = Temp), breaks = c(25, 29)) +
+  geom_point(data = datos2, aes(x = Longitud, y = Latitud)) +
+  stat_density_2d(data = datos2, aes(x = Longitud, y = Latitud, fill = ..level..), geom = "polygon") +
+  scale_fill_gradientn(colours = matlab.like(10)) +
+  coord_quickmap() +
+  scale_y_continuous(limits = c(0, 40), expand = c(0,0)) +
+  scale_x_continuous(limits = c(-150, -75), expand = c(0,0))
+
+gganimate(animation2, filename = "temp_tuna.gif", interval = 0.2)
+
+```
+
+```{r}
+p1 <- datos %>% 
+  mutate(Ano = as.factor(Ano)) %>%
+  ggplot(aes(x = Latitud, y = Talla, frame = Ano)) +
+  geom_jitter(pch = ".", alpha = 0.5) +
+  stat_density_2d(aes(fill = ..level..), geom = "polygon", alpha = 0.5) +
+  theme_bw() +
+  scale_fill_gradientn(colours = matlab.like(10)) +
+  geom_vline(xintercept = 8.64, linetype = "dashed") +
+  geom_vline(xintercept = 18.81, linetype = "dashed") +
+  geom_hline(yintercept = 103, linetype = "dashed")
+
+p2 <- datos %>% 
+  mutate(Ano = as.factor(Ano)) %>%
+  ggplot(aes(x = Longitud, y = Talla, frame = Ano)) +
+  geom_jitter(pch = ".", alpha = 0.5) +
+  stat_density_2d(aes(fill = ..level..), geom = "polygon", alpha = 0.5) +
+  theme_bw() +
+  scale_fill_gradientn(colours = matlab.like(10)) +
+  geom_vline(xintercept = -120.8, linetype = "dashed") +
+  geom_vline(xintercept = -101, linetype = "dashed") +
+  geom_hline(yintercept = 103, linetype = "dashed")
+
+p3 <- datos %>% 
+  filter(Temp < 35) %>% 
+  mutate(Ano = as.factor(Ano)) %>% 
+  ggplot(aes(x = Temp, y = Talla, frame = Ano)) +
+  geom_jitter(pch = ".", alpha = 0.5) +
+  stat_density_2d(aes(fill = ..level..), geom = "polygon", alpha = 0.5) +
+  theme_bw() +
+  scale_fill_gradientn(colours = matlab.like(10)) +
+  geom_vline(xintercept = 25, linetype = "dashed") +
+  geom_vline(xintercept = 29, linetype = "dashed") +
+  geom_hline(yintercept = 103, linetype = "dashed")
+
+gganimate(p1, filename = "latitude.gif", interval = 0.5)
+gganimate(p2, filename = "longitude.gif", interval = 0.5)
+gganimate(p3, filename = "temp_talla.gif", interval = 0.5)
+
+
+```
+
+```{r}
+lm(Talla ~ Ano + Latitud + Longitud, datos) %>% summary()
+```
+
+```{r}
+datos %>% 
+  group_by(Ano, Mes) %>% 
+  summarize(Temp = mean(Temp, na.rm = T)) %>% 
+  left_join(desc, by = c("Ano", "Mes")) %>% 
+  filter(Descarga > 0) %>% 
+  ggplot(aes(x = Temp, y = Descarga, color = Ano)) +
+  geom_point() +
+  theme_bw()
+```
+
+
+# DISCUSSION AND CONCLUSIONS
+
+# FIGURES
+
+Figures should be referred to as e. g. Fig. 2, Fig. 2b, c or Figs 9 and 10 - whether in the main body of the text or in brackets, except at the beginning of sentences where it is in full e. g. Figure 9.
+All illustrations and lettering should be capable of 66% to 50% reduction without loss of clarity or legibility. Ensure consistency in fonts, line thickness and style. Very thin lines do not reproduce clearly. Avoid using tints, a coarse stipple reproduces more clearly.
+Perform a visual check of images by zooming in to 300%. Suitable images will not become noticeably blurred or pixelated.
+Ideally line graphics should be saved in TIFF or EPS format at 600dpi, and halftone figures (colour or greyscale) should be saved as 300dpi TIFF files.
+Please address queries concerning the file types for submission to fog-editorial-office@wiley.com
+In the full-text online edition of the journal, figure legends may be truncated in abbreviated links to the full screen version.  Therefore, the first 100 characters of any legend should inform the reader of key aspects of the figure.
+Figure legends should be typed double-spaced on a separate sheet. Authors wishing to include colour plates in a paper should contact the Editor-in-Chief.
+
+# TABLES
+
+Tables must be typed double-spaced, without vertical rules, and should not duplicate material in the text or illustrations. All tables should have complete but brief headings, be typed on separate sheets of paper, and be numbered consecutively within the text.  Only use horizontal rules to separate the column headers from the main table and at the top and bottom of the table; do not use horizontal rules to separate each line of data.  The first letter of text phrases used as column and row headers should be capitalised.  The 'Table number' should be in bold but the remainder of the text of the heading is to be in standard weight, e. g. Table 2. Correlation coefficients and significance levels.
+
+# REFERENCES
+
+  - Giron-Nava, Alfredo (2016): Climate and fisheries. In dataMares Project: Fisheries. UC San Diego Library Digital Collections. http://dx.doi.org/10.6075/J07H1GG7
+
+  - R Core Team (2015). R: A language and environment for statistical computing. R  foundation for Statistical Computing, Vienna, Austria. URL https://www.R-project.org/
+Hlavac, Marek (2015). stargazer: Well-Formatted Regression and Summary Statistics Tables.  R package version 5.2. http://CRAN.R-project.org/package=stargazer
+
+
+Only full articles which have been published or are 'in press' may be included in the reference list. Papers 'submitted' or 'in prep.' are not permitted.  In the text, unpublished studies should be referred to as such or as a personal communication together with an abbreviated address of the source (e. g. R. Swain, Vancouver University, USA, pers. comm.). References should be inserted in parentheses, as follows: (Cushing, 1989; Young et al., 1986). The reference list should be in alphabetical order according to first-named author. Papers with two authors should follow those of the first-named author, arranged in alphabetical order according to the name of the second author. Articles with more than two authors should follow in chronological order.   All authors' names and the title of the article must be included. Any web references must include the date of last access.
+Ensure that all references occurring in the text are present in the reference list and that correspondingly there are none that are found solely in the reference list. Standard abbreviations of journal titles should be used, following the American National Standard for Abbreviations of Titles of Periodicals. The following provide examples:
+Periodical:
+Cushing, D.H. (1989) A difference in structure between ecosystis in bly stratified waters and in those that are only weakly stratified. J. Plankton Res. 11: 1-13.
+Young, RC., Leis, J.M., and Hausfeld, H.F. (1986) Seasonal and spatial distribution of fish larvae in waters over the North West Continental Shelf of Western Australia. Mar. Ecol. Prog. Ser. 31: 209-222.
+Book:
+Kawasaki, T. (1982) Pelagic Fish Stocks. Tokyo: Koseisha-Koseikaku, 327pp. (In Japanese).
+Paper or chapter in book:
+Sissenwine, M.P. (1984) Why do fish populations vary? In: Exploitation of Marine Communities. R.M. May (ed.) Berlin: Springer-Verlag, pp. 59-94.
+Note: When there is one Editor it is abbreviated to ed. but more than one Editor is eds (without stop).
+PhD Thesis:
+O'Toole, K.J. (1977) Investigations into some important fish larvae in the south east Atlantic in relation to the hydrological environment. PhD thesis, Univeristy of Cape Town, 273pp.
+Published report:
+Hunter, J.R. and Alheit, J. (1995) International GLOBEC Small Pelagic Fishes and Climate Change Program. GLOBEC Rep. No. 8: 72pp.
+Unpublished paper or report
+Hansen, B., Kristiansen, A. and Reinert, J. (1990) Cod and haddock in Faroese waters and possible climatic influences on them. ICES C.M. 1990/G:33, 23pp.
+Internal report:
+Griffin, D.A. and Lochmann, S.E. (1993) Petrel V cruise 31 to Western Bank, 22 Noviber to 16 December 1992.  Halifax, Nova Scotia: Department of Oceanography, Dalhousie University, OPEN Report 1993/1. 105pp. 
+Review articles use abbreviated references. Example:
+Young, P.C. et al. (1986) Mar. Ecol. Prog. Ser., 31: 209-222.
+
